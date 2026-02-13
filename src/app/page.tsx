@@ -99,19 +99,21 @@ export default function Home() {
   const responseAreaRef = useRef<HTMLDivElement>(null);
   const adRef = useRef<HTMLDivElement>(null);
 
-  // Handle click anywhere - show popup ad continuously after each click
+  // Handle click anywhere - show popup ad after 3 clicks
   const handleGlobalClick = useCallback(() => {
     if (show404) return;
 
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // Show ad after first click (continuous)
-    setCurrentAd(ADS[Math.floor(Math.random() * ADS.length)]);
-    setShowAd(true);
+    // Show ad only after 3rd click
+    if (newCount >= 3) {
+      setCurrentAd(ADS[Math.floor(Math.random() * ADS.length)]);
+      setShowAd(true);
+    }
 
-    // Show 404 after 15th click
-    if (newCount >= 15) {
+    // Show 404 after 3rd click
+    if (newCount >= 3) {
       setShow404(true);
       setShowAd(false);
       setShowChatBubble(false);
@@ -315,7 +317,12 @@ gateway restarting...`;
       {/* Ad Type #2 - Sliding Chat Bubble */}
       {showChatBubble && (
         <div className="fixed top-4 right-4 z-40 animate-slideIn">
-          <div className="bg-blue-500 rounded-lg shadow-2xl overflow-hidden max-w-xs">
+          <a
+            href="https://kilo.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-blue-500 rounded-lg shadow-2xl overflow-hidden max-w-xs hover:opacity-90 transition-opacity"
+          >
             {/* Header bar */}
             <div className="bg-blue-600 px-3 py-2 flex items-center justify-between">
               <span className="text-white font-bold" style={{ fontFamily: "Comic Sans MS, cursive" }}>
@@ -323,6 +330,7 @@ gateway restarting...`;
               </span>
               <button
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   handleCloseChatBubble();
                 }}
@@ -337,17 +345,23 @@ gateway restarting...`;
                 Grokcams has something to show to you
               </p>
             </div>
-          </div>
+          </a>
         </div>
       )}
 
       {/* Ad Type #3 - Blocking Ad */}
       {showBlockingAd && (
         <div className="fixed inset-0 z-50 flex items-end justify-center pb-32">
-          <div 
-            className="relative w-full max-w-2xl mx-4 animate-pulse-neon"
+          <a 
+            href="https://kilo.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative w-full max-w-2xl mx-4 animate-pulse-neon cursor-pointer hover:opacity-90 transition-opacity"
             style={{
               animation: 'pulse-zoom 1s ease-in-out infinite, neon-flash 0.5s ease-in-out infinite alternate',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
             }}
           >
             {/* Skip countdown bubble */}
@@ -369,6 +383,7 @@ gateway restarting...`;
                 </p>
                 <button
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     handleSkipBlockingAd();
                   }}
@@ -378,7 +393,7 @@ gateway restarting...`;
                 </button>
               </div>
             </div>
-          </div>
+          </a>
         </div>
       )}
 
