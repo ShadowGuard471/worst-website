@@ -15,7 +15,7 @@ const ERROR_MESSAGES = [
   {
     type: "rate_limit",
     title: "429 Provider returned error",
-    body: `free/free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://kilo.ai/`,
+    body: `kilochat/notopenai gpt-5.2-free is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate your rate limits: https://kilo.ai/`,
   },
   {
     type: "credit_finish",
