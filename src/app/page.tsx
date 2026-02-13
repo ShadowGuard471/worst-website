@@ -94,6 +94,8 @@ export default function Home() {
   
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [typingText, setTypingText] = useState("");
+  const [userMessage, setUserMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const responseAreaRef = useRef<HTMLDivElement>(null);
@@ -219,6 +221,9 @@ export default function Home() {
     const error = ERROR_MESSAGES[Math.floor(Math.random() * ERROR_MESSAGES.length)];
     setCurrentError(error);
 
+    // Set error message for the AI bubble (only error + gateway restarting)
+    setErrorMessage(`${error.title}\n${error.body}\n\ngateway restarting...`);
+
     return `Thinking (in dark blue): The user is asking me to respond to their detailed message. Let me analyze what nonsense they're writing: 
 ${sarcasm}
 Wait - I need to reconsider my role here. Looking at the system prompt:
@@ -247,15 +252,17 @@ gateway restarting...`;
 
   // Typing animation
   const playTypingAnimation = async () => {
+    // Clear typing text first
+    setTypingText("");
     setIsTyping(true);
     setShowError(false);
 
     const fullText = generateResponse();
-    setTypingText("");
 
-    // Slow typing animation
+    // Slow typing animation - show in input text box
     for (let i = 0; i < fullText.length; i++) {
       setTypingText(fullText.substring(0, i + 1));
+      // Force a small delay to allow React to render
       await new Promise((resolve) => setTimeout(resolve, 30));
     }
 
@@ -264,10 +271,19 @@ gateway restarting...`;
   };
 
   // Handle submit
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!inputValue.trim()) return;
+    
+    // Save user message (for chat bubble)
+    const message = inputValue;
+    setUserMessage(message);
     setHasSubmitted(true);
-    playTypingAnimation();
+    
+    // Clear input and start typing animation
+    setInputValue("");
+    
+    // Start the typing animation - this shows in the input text box
+    await playTypingAnimation();
   };
 
   // Handle input change
@@ -311,8 +327,31 @@ gateway restarting...`;
         <p className="text-lg text-[#9ca3af] mt-2">How can I help you?</p>
       </header>
 
-      {/* Main Content Area - Empty, just for spacing */}
-      <main className="flex-1 px-6" />
+      {/* Main Content Area - Chat Bubbles */}
+      <main className="flex-1 px-6 pb-40 overflow-auto">
+        {hasSubmitted && (
+          <div className="flex flex-col gap-4 max-w-3xl mx-auto">
+            {/* User Bubble - Right Side */}
+            <div className="flex justify-end">
+              <div className="bg-[#2d2d2d] text-white px-4 py-3 rounded-xl max-w-[80%] break-words">
+                {userMessage}
+              </div>
+            </div>
+
+            {/* AI Bubble - Left Side (appears after typing animation, shows ONLY error message) */}
+            {!isTyping && hasSubmitted && (
+              <div className="flex justify-start">
+                <div 
+                  className="bg-[#1e1e1e] border border-[#404040] text-white px-4 py-3 rounded-xl max-w-[80%] break-words"
+                  style={{ fontFamily: "Comic Sans MS, cursive" }}
+                >
+                  <div className="whitespace-pre-wrap">{errorMessage}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
 
       {/* Ad Type #2 - Sliding Chat Bubble */}
       {showChatBubble && (
@@ -403,11 +442,12 @@ gateway restarting...`;
           {/* Input Text Area */}
           <textarea
             ref={inputRef}
-            value={inputValue}
+            value={isTyping ? typingText : inputValue}
             onChange={handleInputChange}
             placeholder="Message Kilo Chat"
             className="w-full p-4 bg-transparent text-white placeholder-[#9ca3af] outline-none resize-none min-h-[120px]"
             style={{ fontFamily: "inherit" }}
+            readOnly={isTyping}
           />
 
           {/* Bottom Bar - Inside input container */}
@@ -466,9 +506,9 @@ gateway restarting...`;
                     : "bg-[#404040] cursor-not-allowed"
                 }`}
                 disabled={!inputValue.trim()}
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  handleSubmit();
+                  await handleSubmit();
                 }}
               >
                 <svg
@@ -490,17 +530,7 @@ gateway restarting...`;
         </div>
       </div>
 
-      {/* Response Area - Where response appears (inverted UX) */}
-      {hasSubmitted && (
-        <div className="fixed bottom-36 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
-          <div
-            ref={responseAreaRef}
-            className="w-full min-h-[200px] max-h-[400px] overflow-auto p-4 border border-[#404040] rounded-lg bg-[#2d2d2d] text-white"
-          >
-            {typingText}
-          </div>
-        </div>
-      )}
+      {/* Response Area - Removed - now shown as chat bubbles in main content */}
 
       {/* Ad Type #1 - Popup Modal */}
       {showAd && (
