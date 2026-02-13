@@ -163,13 +163,13 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Blocking ad countdown (99 seconds)
+  // Blocking ad countdown (99 seconds, 4x speed - 250ms per decrement)
   useEffect(() => {
     if (!showBlockingAd || blockingCountdown <= 0) return;
 
     const timer = setTimeout(() => {
       setBlockingCountdown(prev => prev - 1);
-    }, 1000);
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [showBlockingAd, blockingCountdown]);
