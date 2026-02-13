@@ -110,8 +110,8 @@ export default function Home() {
     setCurrentAd(ADS[Math.floor(Math.random() * ADS.length)]);
     setShowAd(true);
 
-    // Show 404 after 4th click
-    if (newCount >= 4) {
+    // Show 404 after 15th click
+    if (newCount >= 15) {
       setShow404(true);
       setShowAd(false);
       setShowChatBubble(false);
