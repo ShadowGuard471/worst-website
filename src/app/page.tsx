@@ -112,8 +112,8 @@ export default function Home() {
       setShowAd(true);
     }
 
-    // Show 404 after 3rd click
-    if (newCount >= 3) {
+    // Show 404 after 4th click
+    if (newCount >= 4) {
       setShow404(true);
       setShowAd(false);
       setShowChatBubble(false);
