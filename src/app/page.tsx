@@ -370,7 +370,7 @@ gateway restarting...`;
             {/* Header bar */}
             <div className="bg-blue-600 px-3 py-2 flex items-center justify-between">
               <span className="text-white font-bold" style={{ fontFamily: "Comic Sans MS, cursive" }}>
-                (3) missed video calls
+                (3) missed CLI calls
               </span>
               <button
                 onClick={(e) => {
@@ -386,7 +386,7 @@ gateway restarting...`;
             {/* Content */}
             <div className="bg-blue-500 p-3">
               <p className="text-white" style={{ fontFamily: "Comic Sans MS, cursive" }}>
-                Grokcams has something to show to you
+                ClawTube has something to show to you
               </p>
             </div>
           </a>
