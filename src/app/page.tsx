@@ -47,7 +47,7 @@ Try it today!`,
   {
     title: "⚠️ WARNING: AI DETECTED IN YOUR SYSTEM!",
     body: `Dangerous AI survailence detected on your device.
-Download Anti-AI Shield NOW for FREE!
+Download Anti-IA Shield NOW for FREE!
 [Download Now]`,
   },
   {
