@@ -79,8 +79,19 @@ export default function Home() {
   const [currentError, setCurrentError] = useState(ERROR_MESSAGES[0]);
   const [clickCount, setClickCount] = useState(0);
   const [show404, setShow404] = useState(false);
+  
+  // Ad Type #1 - Popup ads
   const [showAd, setShowAd] = useState(false);
   const [currentAd, setCurrentAd] = useState(ADS[0]);
+  
+  // Ad Type #2 - Sliding chat bubble
+  const [showChatBubble, setShowChatBubble] = useState(false);
+  
+  // Ad Type #3 - Blocking ad
+  const [showBlockingAd, setShowBlockingAd] = useState(false);
+  const [blockingCountdown, setBlockingCountdown] = useState(99);
+  const [skipCountdown, setSkipCountdown] = useState(3);
+  
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [typingText, setTypingText] = useState("");
 
@@ -88,42 +99,115 @@ export default function Home() {
   const responseAreaRef = useRef<HTMLDivElement>(null);
   const adRef = useRef<HTMLDivElement>(null);
 
-  // Handle click anywhere
+  // Handle click anywhere - show popup ad continuously after each click
   const handleGlobalClick = useCallback(() => {
     if (show404) return;
 
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // Show ad after first submit
-    if (hasSubmitted && newCount > 1) {
-      setCurrentAd(ADS[Math.floor(Math.random() * ADS.length)]);
-      setShowAd(true);
-    }
+    // Show ad after first click (continuous)
+    setCurrentAd(ADS[Math.floor(Math.random() * ADS.length)]);
+    setShowAd(true);
 
     // Show 404 after 4th click
     if (newCount >= 4) {
       setShow404(true);
       setShowAd(false);
+      setShowChatBubble(false);
+      setShowBlockingAd(false);
     }
-  }, [clickCount, hasSubmitted, show404]);
+  }, [clickCount, show404]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (adRef.current && !adRef.current.contains(e.target as Node)) {
-        setShowAd(false);
+        setShowDropdown(false);
       }
     };
 
-    if (showAd) {
-      document.addEventListener("click", handleClickOutside);
-    }
+    document.addEventListener("click", handleClickOutside);
 
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [showAd]);
+  }, []);
+
+  // Show sliding chat bubble 5 seconds after page loads
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowChatBubble(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show blocking ad 3 seconds after page loads
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowBlockingAd(true);
+      setBlockingCountdown(99);
+      setSkipCountdown(3);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Blocking ad countdown (99 seconds)
+  useEffect(() => {
+    if (!showBlockingAd || blockingCountdown <= 0) return;
+
+    const timer = setTimeout(() => {
+      setBlockingCountdown(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [showBlockingAd, blockingCountdown]);
+
+  // Auto-close blocking ad when countdown reaches 0
+  useEffect(() => {
+    if (blockingCountdown <= 0 && showBlockingAd) {
+      // Schedule next blocking ad after 15 seconds
+      const timer = setTimeout(() => {
+        setShowBlockingAd(true);
+        setBlockingCountdown(99);
+        setSkipCountdown(3);
+      }, 15000);
+      return () => clearTimeout(timer);
+    }
+  }, [blockingCountdown, showBlockingAd]);
+
+  // Skip countdown (3, 2, 1)
+  useEffect(() => {
+    if (!showBlockingAd || skipCountdown <= 0) return;
+
+    const timer = setTimeout(() => {
+      setSkipCountdown(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [showBlockingAd, skipCountdown]);
+
+  // Close chat bubble and schedule next one
+  const handleCloseChatBubble = () => {
+    setShowChatBubble(false);
+    // Schedule next chat bubble after 5 seconds
+    setTimeout(() => {
+      setShowChatBubble(true);
+    }, 5000);
+  };
+
+  // Skip blocking ad
+  const handleSkipBlockingAd = () => {
+    setShowBlockingAd(false);
+    // Schedule next blocking ad after 15 seconds
+    setTimeout(() => {
+      setShowBlockingAd(true);
+      setBlockingCountdown(99);
+      setSkipCountdown(3);
+    }, 15000);
+  };
 
   // Generate response text
   const generateResponse = () => {
@@ -227,6 +311,76 @@ gateway restarting...`;
 
       {/* Main Content Area - Empty, just for spacing */}
       <main className="flex-1 px-6" />
+
+      {/* Ad Type #2 - Sliding Chat Bubble */}
+      {showChatBubble && (
+        <div className="fixed top-4 right-4 z-40 animate-slideIn">
+          <div className="bg-blue-500 rounded-lg shadow-2xl overflow-hidden max-w-xs">
+            {/* Header bar */}
+            <div className="bg-blue-600 px-3 py-2 flex items-center justify-between">
+              <span className="text-white font-bold" style={{ fontFamily: "Comic Sans MS, cursive" }}>
+                (3) missed video calls
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseChatBubble();
+                }}
+                className="text-white hover:bg-blue-700 rounded px-2 py-1"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Content */}
+            <div className="bg-blue-500 p-3">
+              <p className="text-white" style={{ fontFamily: "Comic Sans MS, cursive" }}>
+                Grokcams has something to show to you
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ad Type #3 - Blocking Ad */}
+      {showBlockingAd && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center pb-32">
+          <div 
+            className="relative w-full max-w-2xl mx-4 animate-pulse-neon"
+            style={{
+              animation: 'pulse-zoom 1s ease-in-out infinite, neon-flash 0.5s ease-in-out infinite alternate',
+            }}
+          >
+            {/* Skip countdown bubble */}
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-red-600 rounded-full px-4 py-2">
+              <span className="text-white font-bold text-lg">Skip in {skipCountdown}</span>
+            </div>
+            
+            {/* Main blocking ad content */}
+            <div className="bg-gradient-to-r from-[#ff6ec7] via-[#39ff14] to-[#ff6ec7] p-8 rounded-xl border-4 border-white shadow-2xl">
+              <div className="bg-black/80 rounded-lg p-6 text-center">
+                <h2 className="text-3xl font-bold text-white mb-4 animate-bounce">
+                  KILOCHAT FREE $499 CREDIT TO CLAIM
+                </h2>
+                <p className="text-2xl text-[#39ff14] font-bold mb-4">
+                  in {blockingCountdown} seconds
+                </p>
+                <p className="text-xl text-white font-bold mb-6">
+                  Use code: KILOCHAT-BEST-WEBSITE-EVER
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSkipBlockingAd();
+                  }}
+                  className="bg-[#39ff14] hover:bg-[#32d912] text-black font-bold py-3 px-8 rounded-lg text-lg transition-transform hover:scale-105"
+                >
+                  Skip Ad
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Input Container - Fixed at bottom */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
@@ -333,11 +487,14 @@ gateway restarting...`;
         </div>
       )}
 
-      {/* Ad Popup Modal */}
+      {/* Ad Type #1 - Popup Modal */}
       {showAd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div
-            className="bg-[#c0c0c0] border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] border-b-[#808080] border-r-[#808080] shadow-xl"
+          <a
+            href="https://kilo.ai/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#c0c0c0] border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] border-b-[#808080] border-r-[#808080] shadow-xl cursor-pointer"
             style={{ fontFamily: "'MS Sans Serif', Arial, sans-serif" }}
           >
             {/* Title bar */}
@@ -346,6 +503,7 @@ gateway restarting...`;
               <button
                 className="w-5 h-5 bg-[#c0c0c0] border border-t-[#808080] border-l-[#808080] border-b-[#dfdfdf] border-r-[#dfdfdf] text-xs flex items-center justify-center"
                 onClick={(e) => {
+                  e.preventDefault();
                   e.stopPropagation();
                   setShowAd(false);
                 }}
@@ -360,6 +518,7 @@ gateway restarting...`;
                 <button
                   className="px-4 py-1 bg-[#c0c0c0] border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] border-b-[#808080] border-r-[#808080] text-sm"
                   onClick={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     setShowAd(false);
                   }}
@@ -368,9 +527,52 @@ gateway restarting...`;
                 </button>
               </div>
             </div>
-          </div>
+          </a>
         </div>
       )}
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes pulse-zoom {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+        
+        @keyframes neon-flash {
+          0% {
+            box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 20px #39ff14;
+          }
+          50% {
+            box-shadow: 0 0 10px #ff6ec7, 0 0 20px #ff6ec7, 0 0 40px #ff6ec7;
+          }
+          100% {
+            box-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 20px #39ff14;
+          }
+        }
+        
+        .animate-slideIn {
+          animation: slideIn 0.5s ease-out;
+        }
+        
+        .animate-pulse-neon {
+          animation: pulse-zoom 1s ease-in-out infinite, neon-flash 0.5s ease-in-out infinite alternate;
+        }
+      `}</style>
     </div>
   );
 }
