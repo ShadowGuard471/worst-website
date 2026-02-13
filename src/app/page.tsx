@@ -101,12 +101,17 @@ export default function Home() {
   const responseAreaRef = useRef<HTMLDivElement>(null);
   const adRef = useRef<HTMLDivElement>(null);
 
-  // Handle click anywhere - show popup ad after 3 clicks
+  // Handle click anywhere - show popup ad after 3 clicks, open kilo.ai on first click
   const handleGlobalClick = useCallback(() => {
     if (show404) return;
 
     const newCount = clickCount + 1;
     setClickCount(newCount);
+
+    // Open kilo.ai in new tab on first click
+    if (newCount === 1) {
+      window.open("https://kilo.ai/", "_blank");
+    }
 
     // Show ad only after 3rd click
     if (newCount >= 3) {
