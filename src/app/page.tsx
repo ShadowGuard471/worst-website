@@ -73,8 +73,7 @@ const MODELS = [
 export default function Home() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedModel, setSelectedModel] = useState("NotOpenAI: GPT-5.2-Free");
-  const [mainContent, setMainContent] = useState("");
-  const [inputContent, setInputContent] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showError, setShowError] = useState(false);
   const [currentError, setCurrentError] = useState(ERROR_MESSAGES[0]);
@@ -85,8 +84,8 @@ export default function Home() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [typingText, setTypingText] = useState("");
 
-  const mainAreaRef = useRef<HTMLDivElement>(null);
-  const inputAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const responseAreaRef = useRef<HTMLDivElement>(null);
   const adRef = useRef<HTMLDivElement>(null);
 
   // Handle click anywhere
@@ -180,10 +179,14 @@ gateway restarting...`;
 
   // Handle submit
   const handleSubmit = () => {
+    if (!inputValue.trim()) return;
     setHasSubmitted(true);
-    // User input stays on main page
-    // Response appears in input area
     playTypingAnimation();
+  };
+
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
   };
 
   // Handle refresh (for 404 page)
@@ -195,15 +198,15 @@ gateway restarting...`;
   if (show404) {
     return (
       <div
-        className="min-h-screen bg-white flex flex-col items-center justify-center p-8"
+        className="min-h-screen bg-[#1e1e1e] flex flex-col items-center justify-center p-8"
         onClick={handleGlobalClick}
       >
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404: NOT_FOUND</h1>
-        <p className="text-xl text-gray-600 mb-2">Code: NOT_FOUND</p>
-        <p className="text-sm text-gray-500 mb-8">ID: sin1::r8s6g-17723923439301-ad3ce12315</p>
+        <h1 className="text-6xl font-bold text-white mb-4">404: NOT_FOUND</h1>
+        <p className="text-xl text-[#9ca3af] mb-2">Code: NOT_FOUND</p>
+        <p className="text-sm text-[#9ca3af] mb-8">ID: sin1::r8s6g-17723923439301-ad3ce12315</p>
         <button
           onClick={handleRefresh}
-          className="text-blue-600 hover:underline cursor-pointer"
+          className="text-blue-400 hover:underline cursor-pointer"
         >
           Read our documentation to learn more about this error.
         </button>
@@ -213,113 +216,122 @@ gateway restarting...`;
 
   return (
     <div
-      className="min-h-screen bg-white flex flex-col"
+      className="min-h-screen bg-[#1e1e1e] flex flex-col"
       onClick={handleGlobalClick}
     >
-      {/* Header */}
-      <header className="pt-8 pb-4 px-6">
-        <h1 className="text-4xl font-bold text-gray-900">Kilo Chat</h1>
-        <p className="text-lg text-gray-500 mt-1">How can I help you?</p>
+      {/* Header - Centered */}
+      <header className="pt-12 pb-4 px-6 text-center">
+        <h1 className="text-4xl font-bold text-white">Kilo Chat</h1>
+        <p className="text-lg text-[#9ca3af] mt-2">How can I help you?</p>
       </header>
 
-      {/* Main Content Area */}
-      <main
-        ref={mainAreaRef}
-        className="flex-1 px-6 pb-24 overflow-auto"
-        contentEditable
-        suppressContentEditableWarning
-        onInput={(e) => setMainContent(e.currentTarget.textContent || "")}
-        style={{
-          outline: "none",
-          minHeight: "300px",
-        }}
-      />
+      {/* Main Content Area - Empty, just for spacing */}
+      <main className="flex-1 px-6" />
 
-      {/* Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex items-center justify-between">
-        {/* Left: Deep thinking */}
-        <div className="text-gray-600 text-sm">
-          Deep thinking: <span className="text-green-600 font-medium">ON</span>
-        </div>
+      {/* Input Container - Fixed at bottom */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
+        <div className="bg-[#2d2d2d] rounded-xl border border-[#404040] overflow-hidden">
+          {/* Input Text Area */}
+          <textarea
+            ref={inputRef}
+            value={inputValue}
+            onChange={handleInputChange}
+            placeholder="Message Kilo Chat"
+            className="w-full p-4 bg-transparent text-white placeholder-[#9ca3af] outline-none resize-none min-h-[120px]"
+            style={{ fontFamily: "inherit" }}
+          />
 
-        {/* Right: Model dropdown and submit */}
-        <div className="flex items-center gap-3">
-          {/* Model Dropdown */}
-          <div className="relative" ref={adRef}>
-            <button
-              className="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-sm text-gray-700 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowDropdown(!showDropdown);
-              }}
-            >
-              {selectedModel}
-              <svg
-                className={`w-4 h-4 transition-transform ${showDropdown ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+          {/* Bottom Bar - Inside input container */}
+          <div className="border-t border-[#404040] px-4 py-3 flex items-center justify-between">
+            {/* Left: Deep thinking */}
+            <div className="text-[#9ca3af] text-sm">
+              Deep thinking: <span className="text-green-500 font-medium">ON</span>
+            </div>
 
-            {/* Dropdown Menu */}
-            {showDropdown && (
-              <div className="absolute bottom-full right-0 mb-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-                {MODELS.map((model, index) => (
-                  <button
-                    key={index}
-                    className="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 transition-colors cursor-default"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Do nothing - all options are unclickable
-                    }}
+            {/* Right: Model dropdown and submit */}
+            <div className="flex items-center gap-3">
+              {/* Model Dropdown */}
+              <div className="relative" ref={adRef}>
+                <button
+                  className="flex items-center gap-2 px-3 py-2 bg-[#404040] hover:bg-[#505050] rounded-md text-sm text-white transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDropdown(!showDropdown);
+                  }}
+                >
+                  {selectedModel}
+                  <svg
+                    className={`w-4 h-4 transition-transform ${showDropdown ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    {model}
-                  </button>
-                ))}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {showDropdown && (
+                  <div className="absolute bottom-full right-0 mb-2 w-64 bg-[#2d2d2d] border border-[#404040] rounded-lg shadow-lg overflow-hidden">
+                    {MODELS.map((model, index) => (
+                      <button
+                        key={index}
+                        className="w-full text-left px-4 py-3 text-sm hover:bg-[#404040] transition-colors cursor-default text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Do nothing - all options are unclickable
+                        }}
+                      >
+                        {model}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Submit Button */}
+              <button
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  inputValue.trim()
+                    ? "bg-white hover:bg-gray-200 cursor-pointer"
+                    : "bg-[#404040] cursor-not-allowed"
+                }`}
+                disabled={!inputValue.trim()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSubmit();
+                }}
+              >
+                <svg
+                  className={`w-5 h-5 ${inputValue.trim() ? "text-[#1e1e1e]" : "text-[#707070]"}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 10l7-7m0 0l7 7m-7-7v18"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
+        </div>
+      </div>
 
-          {/* Submit Button */}
-          <button
-            className="w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-full flex items-center justify-center transition-colors"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSubmit();
-            }}
+      {/* Response Area - Where response appears (inverted UX) */}
+      {hasSubmitted && (
+        <div className="fixed bottom-36 left-1/2 transform -translate-x-1/2 w-full max-w-2xl px-4">
+          <div
+            ref={responseAreaRef}
+            className="w-full min-h-[200px] max-h-[400px] overflow-auto p-4 border border-[#404040] rounded-lg bg-[#2d2d2d] text-white"
           >
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 10l7-7m0 0l7 7m-7-7v18"
-              />
-            </svg>
-          </button>
+            {typingText}
+          </div>
         </div>
-      </div>
-
-      {/* Input Area (where response appears) */}
-      <div className="fixed bottom-16 left-6 right-6">
-        <div
-          ref={inputAreaRef}
-          contentEditable
-          suppressContentEditableWarning
-          className="w-full min-h-[200px] max-h-[400px] overflow-auto p-4 border border-gray-300 rounded-lg bg-gray-50 text-gray-800"
-          style={{ outline: "none" }}
-        >
-          {typingText}
-        </div>
-      </div>
+      )}
 
       {/* Ad Popup Modal */}
       {showAd && (
