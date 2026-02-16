@@ -77,6 +77,8 @@ export default function Home() {
   const [isTyping, setIsTyping] = useState(false);
   const [showError, setShowError] = useState(false);
   const [currentError, setCurrentError] = useState(ERROR_MESSAGES[0]);
+  const [errorBubbles, setErrorBubbles] = useState<{id: number; message: string}[]>([]);
+  const [isAutoStacking, setIsAutoStacking] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [show404, setShow404] = useState(false);
   
@@ -302,6 +304,8 @@ gateway restarting...`;
     setTypingText("");
     setIsTyping(true);
     setShowError(false);
+    setErrorBubbles([]);
+    setIsAutoStacking(false);
 
     const fullText = generateResponse();
 
@@ -314,6 +318,37 @@ gateway restarting...`;
 
     setIsTyping(false);
     setShowError(true);
+    
+    // Start auto-stacking error bubbles after typing animation finishes
+    startAutoStacking();
+  };
+
+  // Auto-stack error bubbles - spawns multiple copies with delays
+  const startAutoStacking = () => {
+    setIsAutoStacking(true);
+    
+    // Add first bubble immediately
+    setErrorBubbles([{ id: 1, message: errorMessage }]);
+    
+    // Spawn additional bubbles with random delays (0.5-3 seconds apart)
+    const totalBubbles = 3 + Math.floor(Math.random() * 3); // 3-5 additional bubbles
+    let currentBubble = 1;
+    
+    const addNextBubble = () => {
+      if (currentBubble < totalBubbles) {
+        currentBubble++;
+        const delay = 500 + Math.random() * 2500; // 0.5-3 seconds
+        setTimeout(() => {
+          setErrorBubbles(prev => [...prev, { id: currentBubble, message: errorMessage }]);
+          addNextBubble();
+        }, delay);
+      } else {
+        setIsAutoStacking(false);
+      }
+    };
+    
+    // Start adding more bubbles after the first one
+    setTimeout(addNextBubble, 500 + Math.random() * 2500);
   };
 
   // Handle submit
@@ -385,14 +420,18 @@ gateway restarting...`;
             </div>
 
             {/* AI Bubble - Right Side (appears after typing animation, shows ONLY error message) */}
-            {!isTyping && hasSubmitted && (
-              <div className="flex justify-end">
-                <div 
-                  className="glitch-background px-4 py-3 rounded-xl max-w-[80%] break-words rgb-glitch-text shadow-[0_0_15px_rgba(0,255,255,0.5),0_0_30px_rgba(255,0,255,0.3)]"
-                  style={{ fontFamily: "Comic Sans MS, cursive" }}
-                >
-                  <div className="whitespace-pre-wrap">{errorMessage}</div>
-                </div>
+            {!isTyping && hasSubmitted && errorBubbles.length > 0 && (
+              <div className="flex flex-col gap-4">
+                {errorBubbles.map((bubble, index) => (
+                  <div key={bubble.id} className="flex justify-end">
+                    <div 
+                      className="glitch-background px-4 py-3 rounded-xl max-w-[80%] break-words rgb-glitch-text shadow-[0_0_15px_rgba(0,255,255,0.5),0_0_30px_rgba(255,0,255,0.3)]"
+                      style={{ fontFamily: "Comic Sans MS, cursive" }}
+                    >
+                      <div className="whitespace-pre-wrap">{bubble.message}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

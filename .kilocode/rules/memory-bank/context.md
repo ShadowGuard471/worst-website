@@ -19,6 +19,7 @@ A satirical "reverse UX" AI chat interface that looks like Kilo Chat but works i
 - [x] Added chat bubble layout (user bubble right, AI bubble left)
 - [x] Fixed output flow - typing animation in input box, error messages only in AI bubble
 - [x] Made submit button async to properly await typing animation
+- [x] Added error bubble auto-stacking - multiple error bubbles spawn after typing animation
 
 ## Current Structure
 
