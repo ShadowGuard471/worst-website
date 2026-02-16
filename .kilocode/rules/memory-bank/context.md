@@ -15,7 +15,7 @@ A satirical "reverse UX" AI chat interface that looks like Kilo Chat but works i
 - [x] Memory bank documentation
 - [x] Recipe system for common features
 - [x] Satirical reverse UX chat interface built
-- [x] Redesigned to professional dark theme layout
+- [x] Added idle timeout - page goes to 404 after 60 seconds of inactivity
 - [x] Added chat bubble layout (user bubble right, AI bubble left)
 - [x] Fixed output flow - typing animation in input box, error messages only in AI bubble
 - [x] Made submit button async to properly await typing animation
