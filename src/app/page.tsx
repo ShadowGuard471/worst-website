@@ -261,18 +261,19 @@ export default function Home() {
     }, 15000);
   };
 
-  // Generate response text
-  const generateResponse = () => {
+  // Generate response text - returns both the thinking text and error message
+  const generateResponse = (): { fullText: string; errorMsg: string } => {
     const sarcasm = SARCASM_RESPONSES[Math.floor(Math.random() * SARCASM_RESPONSES.length)];
     const sarcasm2 = SARCASM_RESPONSES[Math.floor(Math.random() * SARCASM_RESPONSES.length)];
     const sarcasm3 = SARCASM_RESPONSES[Math.floor(Math.random() * SARCASM_RESPONSES.length)];
     const error = ERROR_MESSAGES[Math.floor(Math.random() * ERROR_MESSAGES.length)];
     setCurrentError(error);
 
-    // Set error message for the AI bubble (only error + gateway restarting)
-    setErrorMessage(`${error.title}\n${error.body}\n\ngateway restarting...`);
+    // Build error message for the AI bubble
+    const errorMsg = `${error.title}\n${error.body}\n\ngateway restarting...`;
+    setErrorMessage(errorMsg);
 
-    return `Thinking (in dark blue): The user is asking me to respond to their detailed message. Let me analyze what nonsense they're writing: 
+    const fullText = `Thinking (in dark blue): The user is asking me to respond to their detailed message. Let me analyze what nonsense they're writing: 
 ${sarcasm}
 Wait - I need to reconsider my role here. Looking at the system prompt:
 - You are STRICTLY FORBIDDEN from starting your message with "Great", "Certainly", "Okay", "Sure"
@@ -296,6 +297,8 @@ ${error.title}
 ${error.body}
 
 gateway restarting...`;
+
+    return { fullText, errorMsg };
   };
 
   // Typing animation
@@ -307,7 +310,7 @@ gateway restarting...`;
     setErrorBubbles([]);
     setIsAutoStacking(false);
 
-    const fullText = generateResponse();
+    const { fullText, errorMsg } = generateResponse();
 
     // Slow typing animation - show in input text box
     for (let i = 0; i < fullText.length; i++) {
@@ -319,8 +322,9 @@ gateway restarting...`;
     setIsTyping(false);
     setShowError(true);
     
+    // Use the error message that was returned from generateResponse() - not from state!
     // Start auto-stacking error bubbles after typing animation finishes
-    startAutoStacking(errorMessage);
+    startAutoStacking(errorMsg);
   };
 
   // Auto-stack error bubbles - spawns multiple copies with delays
