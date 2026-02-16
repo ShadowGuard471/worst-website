@@ -347,7 +347,7 @@ gateway restarting...`;
             {!isTyping && hasSubmitted && (
               <div className="flex justify-end">
                 <div 
-                  className="bg-[#1e1e1e] border border-[#404040] text-white px-4 py-3 rounded-xl max-w-[80%] break-words"
+                  className="glitch-background text-white px-4 py-3 rounded-xl max-w-[80%] break-words rgb-glitch-text border border-white/30"
                   style={{ fontFamily: "Comic Sans MS, cursive" }}
                 >
                   <div className="whitespace-pre-wrap">{errorMessage}</div>
