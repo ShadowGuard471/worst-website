@@ -336,16 +336,16 @@ gateway restarting...`;
       <main className="flex-1 px-6 pb-40 overflow-auto">
         {hasSubmitted && (
           <div className="flex flex-col gap-4 max-w-3xl mx-auto">
-            {/* User Bubble - Right Side */}
-            <div className="flex justify-end">
-              <div className="bg-[#2d2d2d] text-white px-4 py-3 rounded-xl max-w-[80%] break-words">
+            {/* User Bubble - Left Side */}
+            <div className="flex justify-start">
+              <div className="bg-white text-black px-4 py-3 rounded-xl max-w-[80%] break-words">
                 {userMessage}
               </div>
             </div>
 
-            {/* AI Bubble - Left Side (appears after typing animation, shows ONLY error message) */}
+            {/* AI Bubble - Right Side (appears after typing animation, shows ONLY error message) */}
             {!isTyping && hasSubmitted && (
-              <div className="flex justify-start">
+              <div className="flex justify-end">
                 <div 
                   className="bg-[#1e1e1e] border border-[#404040] text-white px-4 py-3 rounded-xl max-w-[80%] break-words"
                   style={{ fontFamily: "Comic Sans MS, cursive" }}
