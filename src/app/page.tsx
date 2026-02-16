@@ -320,15 +320,15 @@ gateway restarting...`;
     setShowError(true);
     
     // Start auto-stacking error bubbles after typing animation finishes
-    startAutoStacking();
+    startAutoStacking(errorMessage);
   };
 
   // Auto-stack error bubbles - spawns multiple copies with delays
-  const startAutoStacking = () => {
+  const startAutoStacking = (errorMsg: string) => {
     setIsAutoStacking(true);
     
     // Add first bubble immediately
-    setErrorBubbles([{ id: 1, message: errorMessage }]);
+    setErrorBubbles([{ id: 1, message: errorMsg }]);
     
     // Spawn additional bubbles with random delays (0.5-3 seconds apart)
     const totalBubbles = 3 + Math.floor(Math.random() * 3); // 3-5 additional bubbles
@@ -339,7 +339,7 @@ gateway restarting...`;
         currentBubble++;
         const delay = 500 + Math.random() * 2500; // 0.5-3 seconds
         setTimeout(() => {
-          setErrorBubbles(prev => [...prev, { id: currentBubble, message: errorMessage }]);
+          setErrorBubbles(prev => [...prev, { id: currentBubble, message: errorMsg }]);
           addNextBubble();
         }, delay);
       } else {
