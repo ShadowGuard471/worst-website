@@ -65,20 +65,32 @@
 }
 
 .rgb-glitch-text {
-  animation: rgbSplit 0.3s infinite alternate;
+  animation: rgbSplit 0.15s infinite alternate;
+  color: #00ff00 !important;
+  text-shadow: 
+    -3px 0 #ff0000, 
+    3px 0 #00ffff, 
+    0 0 10px #ff0000, 
+    0 0 20px #00ffff,
+    0 0 30px #ff00ff !important;
+  font-weight: bold;
 }
 
 .glitch-background {
   position: relative;
   background: linear-gradient(
     135deg,
-    rgba(255, 0, 0, 0.15) 0%,
-    rgba(0, 255, 0, 0.15) 33%,
-    rgba(0, 0, 255, 0.15) 66%,
-    rgba(255, 0, 255, 0.15) 100%
+    rgba(255, 0, 0, 0.4) 0%,
+    rgba(0, 255, 0, 0.4) 33%,
+    rgba(0, 0, 255, 0.4) 66%,
+    rgba(255, 0, 255, 0.4) 100%
   );
-  background-size: 200% 200%;
-  animation: glitchBg 0.5s linear infinite;
+  background-size: 400% 400%;
+  animation: glitchBg 0.3s linear infinite;
+  box-shadow: 
+    0 0 10px rgba(255, 0, 0, 0.5),
+    0 0 20px rgba(0, 255, 0, 0.5),
+    0 0 30px rgba(0, 0, 255, 0.5);
 }
 
 .glitch-background::before {
