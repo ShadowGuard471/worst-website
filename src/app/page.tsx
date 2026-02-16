@@ -100,6 +100,47 @@ export default function Home() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const responseAreaRef = useRef<HTMLDivElement>(null);
   const adRef = useRef<HTMLDivElement>(null);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle 404 after 60 seconds of idle
+  const handleIdleTimeout = useCallback(() => {
+    if (!show404) {
+      setShow404(true);
+      setShowAd(false);
+      setShowChatBubble(false);
+      setShowBlockingAd(false);
+    }
+  }, [show404]);
+
+  // Reset idle timer on user activity
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    if (!show404) {
+      idleTimerRef.current = setTimeout(handleIdleTimeout, 60000); // 60 seconds
+    }
+  }, [handleIdleTimeout, show404]);
+
+  // Set up idle timer on mount and cleanup
+  useEffect(() => {
+    resetIdleTimer();
+    
+    // Add event listeners for user activity
+    const events = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => {
+      document.addEventListener(event, resetIdleTimer);
+    });
+
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+      events.forEach(event => {
+        document.removeEventListener(event, resetIdleTimer);
+      });
+    };
+  }, [resetIdleTimer]);
 
   // Handle click anywhere - show popup ad after 3 clicks, open kilo.ai on first click
   const handleGlobalClick = useCallback(() => {
